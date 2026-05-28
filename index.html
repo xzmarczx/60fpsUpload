@@ -1,567 +1,328 @@
 <!DOCTYPE html>
-<html>
-  <meta charset='UTF-8'/><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes"><meta content='IE=edge' http-equiv='X-UA-Compatible'/>
-  <head>
-  <style>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Glassy Video Speed Tool</title>
 
-:root{
-  --bg:#050505;
-  --card:rgba(18,18,18,.72);
-  --border:rgba(255,255,255,.07);
-  --text:#fff;
-  --muted:rgba(255,255,255,.58);
-  --accent:#ffffff;
-  --success:#63ff93;
-  --danger:#ff7d7d;
-}
+<style>
 
 *{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
 body{
-  margin:0;
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:18px;
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
-  color:var(--text);
-  background:
-    radial-gradient(circle at top, rgba(255,255,255,.05), transparent 30%),
-    linear-gradient(180deg,#050505 0%,#000 100%);
+    width:100%;
+    height:100vh;
+    overflow:hidden;
+    font-family:Arial,sans-serif;
+    background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    position:relative;
+}
+
+/* Animated background */
+body::before,
+body::after{
+    content:"";
+    position:absolute;
+    width:400px;
+    height:400px;
+    border-radius:50%;
+    filter:blur(80px);
+    animation:float 8s infinite ease-in-out;
 }
 
 body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  backdrop-filter:blur(30px);
-  pointer-events:none;
+    background:#00ffcc;
+    top:-100px;
+    left:-100px;
 }
 
-.cu-shell{
-  width:100%;
-  max-width:900px;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  position:relative;
-  z-index:1;
+body::after{
+    background:#ff00aa;
+    bottom:-100px;
+    right:-100px;
+    animation-delay:4s;
 }
 
-.cu-header,
-.cu-card,
-.cu-warning-modal{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:28px;
-  backdrop-filter:blur(28px) saturate(180%);
-  -webkit-backdrop-filter:blur(28px) saturate(180%);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.05),
-    0 20px 40px rgba(0,0,0,.45);
+@keyframes float{
+    0%{
+        transform:translateY(0px) translateX(0px);
+    }
+    50%{
+        transform:translateY(30px) translateX(20px);
+    }
+    100%{
+        transform:translateY(0px) translateX(0px);
+    }
 }
 
-.cu-header{
-  padding:18px;
+.container{
+    width:340px;
+    padding:30px;
+    border-radius:28px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.15);
+    box-shadow:
+        0 8px 32px rgba(0,0,0,0.4),
+        inset 0 0 10px rgba(255,255,255,0.05);
+    text-align:center;
+    position:relative;
+    z-index:10;
+    animation:fadeIn 1s ease;
 }
 
-.cu-card{
-  padding:16px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(20px) scale(0.95);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0px) scale(1);
+    }
 }
 
-.cu-brand-row{
-  display:flex;
-  align-items:center;
-  gap:14px;
+.logo{
+    font-size:26px;
+    font-weight:bold;
+    margin-bottom:8px;
+    background:linear-gradient(90deg,#00ffcc,#00aaff,#ff00aa);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
 }
 
-.cu-mark{
-  width:58px;
-  height:58px;
-  border-radius:20px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:22px;
-  background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.04));
-  border:1px solid rgba(255,255,255,.08);
+.sub{
+    color:#cbd5e1;
+    font-size:14px;
+    margin-bottom:25px;
 }
 
-.cu-mark::before{
-  content:"✦";
+.upload-box{
+    border:2px dashed rgba(255,255,255,0.25);
+    padding:25px 10px;
+    border-radius:20px;
+    margin-bottom:20px;
+    transition:0.3s;
+    cursor:pointer;
 }
 
-h1{
-  margin:0;
-  font-size:32px;
-  font-weight:700;
+.upload-box:hover{
+    border-color:#00ffcc;
+    transform:scale(1.02);
 }
 
-.cu-subtitle{
-  margin-top:4px;
-  font-size:18px;
-  color:var(--muted);
+.upload-box p{
+    color:#e2e8f0;
+    font-size:14px;
 }
 
-.cu-lang,
-.cu-method,
-#openTabBtn{
-  display:none !important;
-}
-
-.cu-field-label{
-  font-size:18px;
-  color:rgba(255,255,255,.7);
-}
-
-input[type="file"]{
-  width:100%;
-  border:none;
-  outline:none;
-  padding:13px;
-  border-radius:20px;
-  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-  border:1px solid rgba(255,255,255,.05);
-  color:rgba(255,255,255,.65);
-  font-size:18px;
-}
-
-input[type="file"]::file-selector-button{
-  border:none;
-  padding:11px 14px;
-  border-radius:14px;
-  background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05));
-  color:#fff;
-  margin-right:10px;
-  cursor:pointer;
+input{
+    display:none;
 }
 
 button{
-  width:100%;
-  border:none;
-  border-radius:18px;
-  padding:13px;
-  font-size:22px;
-  font-weight:600;
-  color:#fff;
-  cursor:pointer;
-  transition:.2s ease;
-  font-family:inherit;
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:16px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    background:linear-gradient(90deg,#00ffcc,#00aaff);
+    color:#000;
+    transition:0.3s;
+    box-shadow:0 0 20px rgba(0,255,200,0.35);
+}
+
+button:hover{
+    transform:translateY(-2px) scale(1.02);
+    box-shadow:0 0 30px rgba(0,255,200,0.6);
 }
 
 button:active{
-  transform:scale(.97);
-}
-
-.patch-btn,
-.secondary{
-  background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05));
-  border:1px solid rgba(255,255,255,.08);
-}
-
-.patch-btn:disabled{
-  opacity:.45;
-  cursor:not-allowed;
+    transform:scale(0.98);
 }
 
 #status{
-  padding:13px;
-  border-radius:18px;
-  font-size:18px;
-  background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
-  border:1px solid rgba(255,255,255,.05);
-  color:rgba(255,255,255,.6);
+    margin-top:18px;
+    font-size:14px;
+    color:#e2e8f0;
+    min-height:20px;
 }
 
-#status[data-state="processing"]{ color:#8fc8ff; }
-#status[data-state="success"]{ color:var(--success); }
-#status[data-state="error"]{ color:var(--danger); }
-
-
-html, body {
-  width: 100%;
-  min-width: 100%;
-  overflow-x: hidden;
-  zoom: 1;
+.progress{
+    width:100%;
+    height:10px;
+    background:rgba(255,255,255,0.08);
+    border-radius:999px;
+    overflow:hidden;
+    margin-top:15px;
 }
 
-.cu-shell {
-  width: 100%;
-  max-width: 900px !important;
+.progress-bar{
+    width:0%;
+    height:100%;
+    border-radius:999px;
+    background:linear-gradient(90deg,#00ffcc,#00aaff,#ff00aa);
+    transition:0.3s;
 }
 
-iframe {
-  width: 100% !important;
-  min-width: 100% !important;
+.file-name{
+    margin-top:10px;
+    font-size:13px;
+    color:#94a3b8;
 }
 
 </style>
 </head>
 <body>
-  <main class="cu-shell">
-    <header class="cu-header">
-      <div class="cu-brand-row">
-        <div class="cu-mark" aria-hidden="true"></div>
-        <div>
-          <h1 data-i18n="title">tyce60fps Uploader</h1>
-          <p class="cu-subtitle" data-i18n="subtitle">TIKTOK HD</p>
-        </div>
-        <div class="cu-lang" aria-label="Language">
-          <button class="lang-btn is-active" type="button" data-lang="en">EN</button>
-          <button class="lang-btn" type="button" data-lang="pt">PT</button>
-        </div>
-      </div>
-      <div class="cu-method" data-i18n="method">Lenoz7 &amp; NXT_tyce537 method</div>
-    </header>
 
-    <section class="cu-card" aria-label="tyce60fps upload">
-      <label class="cu-field-label" for="fileInput" data-i18n="selectVideo">Select video</label>
-      <input type="file" id="fileInput" accept="video/*">
-      <button class="secondary" id="openTabBtn" type="button" data-i18n="openTab">Open in new tab</button>
-      <button class="patch-btn" id="patchBtn" disabled type="button" data-i18n="patchDownload">download</button>
-      <div id="status" data-state="idle" data-i18n="ready">Ready</div>
-            <button class="secondary" id="studioBtn" type="button">TikTok Studio</button>
-    </section>
-  </main>
+<div class="container">
 
-  <div class="cu-warning-overlay" id="sizeWarning" role="dialog" aria-modal="true" aria-labelledby="sizeWarningTitle" hidden>
-    <div class="cu-warning-modal">
-      <span class="cu-warning-kicker" data-i18n="sizeWarningKicker">File size warning</span>
-      <h2 class="cu-warning-title" id="sizeWarningTitle" data-i18n="sizeWarningTitle">Video over 90 MB</h2>
-      <p class="cu-warning-body" data-i18n="sizeWarningBody">
-        Your video is bigger than 90 MB. It may flop because of that. It is HIGHLY recommended to compress it more.
-      </p>
-      <button class="cu-warning-close" id="sizeWarningClose" type="button" data-i18n="close">Close</button>
+    <div class="logo">Video Speed Tool</div>
+    <div class="sub">Glassy FFmpeg Style UI</div>
+
+    <label class="upload-box">
+        <input type="file" id="videoInput" accept="video/*">
+        <p>Tap to Upload Video</p>
+        <div class="file-name" id="fileName">No file selected</div>
+    </label>
+
+    <button onclick="processVideo()">
+        Process & Download
+    </button>
+
+    <div class="progress">
+        <div class="progress-bar" id="bar"></div>
     </div>
-  </div>
 
-  <script>
-    const tyce_MATRIX_B_VALUE = 1; // tyce patch: mvhd display matrix b -> 0x00000001
+    <div id="status">Waiting...</div>
 
-const fileInput = document.getElementById('fileInput');
-const patchBtn = document.getElementById('patchBtn');
-const openTabBtn = document.getElementById('openTabBtn');
-const studioBtn = document.getElementById('studioBtn');
-const statusEl = document.getElementById('status');
-const sizeWarningEl = document.getElementById('sizeWarning');
-const sizeWarningCloseBtn = document.getElementById('sizeWarningClose');
-const langBtns = Array.from(document.querySelectorAll('[data-lang]'));
-const i18nEls = Array.from(document.querySelectorAll('[data-i18n]'));
+</div>
 
-const LANG_KEY = 'tyce60fpsUploaderLang';
-const SIZE_WARNING_BYTES = 90 * 1024 * 1024;
-const COPY = {
-  en: {
-    title: 'tyce60fps Uploader',
-    subtitle: 'TIKTOK HD',
-    method: 'Lenoz7 & NXT_tyce537 method',
-    selectVideo: 'Select video',
-    openTab: 'Open in new tab',
-    patchDownload: 'Download',
-    ready: 'Ready',
-    processing: 'Processing',
-    done: 'Done',
-    error: 'Error',
-    selected: 'Ready: {name}',
-    scanning: 'Processing: locating moov/mvhd',
-    patched: 'Processing: matrix_b {previousValue} -> {newValue}. Downloading',
-    downloaded: 'Done: file downloaded',
-    failed: 'Error: {message}',
-    sizeWarningKicker: 'File size warning',
-    sizeWarningTitle: 'Video over 90 MB',
-    sizeWarningBody: 'Your video is bigger than 90 MB. It may flop because of that. It is HIGHLY recommended to compress it more.',
-    close: 'Close',
-  },
-  
-};
+<script>
 
-let selectedFile = null;
-let currentLang = 'en';
-let currentStatus = { key: 'ready', state: 'idle', values: {} };
+const input = document.getElementById("videoInput");
+const fileName = document.getElementById("fileName");
+const statusText = document.getElementById("status");
+const bar = document.getElementById("bar");
 
-function formatCopy(template, values = {}) {
-  return String(template || '').replace(/\{(\w+)\}/g, (_, key) => values[key] ?? '');
-}
+input.addEventListener("change", ()=>{
 
-function t(key, values = {}) {
-  return formatCopy((COPY[currentLang] && COPY[currentLang][key]) || COPY.en[key] || key, values);
-}
-
-function persistLanguage(lang) {
-  try {
-    localStorage.setItem(LANG_KEY, lang);
-  } catch (err) {}
-}
-
-function getSavedLanguage() {
-  try {
-    const saved = localStorage.getItem(LANG_KEY);
-    return saved === 'pt' || saved === 'en' ? saved : 'en';
-  } catch (err) {
-    return 'en';
-  }
-}
-
-function setStatus(key, state = 'idle', values = {}) {
-  currentStatus = { key, state, values };
-  statusEl.textContent = t(key, values);
-  statusEl.dataset.state = state;
-}
-
-function setLanguage(lang) {
-  currentLang = lang === 'pt' ? 'pt' : 'en';
-  document.documentElement.lang = currentLang;
-
-  i18nEls.forEach((el) => {
-    const key = el.dataset.i18n;
-    el.textContent = t(key);
-  });
-
-  fileInput.setAttribute('aria-label', t('selectVideo'));
-
-  langBtns.forEach((btn) => {
-    const isActive = btn.dataset.lang === currentLang;
-    btn.classList.toggle('is-active', isActive);
-    btn.setAttribute('aria-pressed', String(isActive));
-  });
-
-  setStatus(currentStatus.key, currentStatus.state, currentStatus.values);
-  persistLanguage(currentLang);
-}
-
-function showSizeWarning() {
-  sizeWarningEl.hidden = false;
-}
-
-function hideSizeWarning() {
-  sizeWarningEl.hidden = true;
-}
-
-function getBoxType(data, offset) {
-  return String.fromCharCode(
-    data[offset],
-    data[offset + 1],
-    data[offset + 2],
-    data[offset + 3]
-  );
-}
-
-function readBox(view, data, offset, end) {
-  if (offset + 8 > end) {
-    throw new Error('MP4 invalido: caixa incompleta.');
-  }
-
-  const smallSize = view.getUint32(offset, false);
-  const type = getBoxType(data, offset + 4);
-  let size = smallSize;
-  let headerSize = 8;
-
-  if (smallSize === 1) {
-    if (offset + 16 > end) {
-      throw new Error(`MP4 invalido: caixa ${type} incompleta.`);
+    if(input.files[0]){
+        fileName.innerText = input.files[0].name;
     }
 
-    const high = view.getUint32(offset + 8, false);
-    const low = view.getUint32(offset + 12, false);
-    size = high * 4294967296 + low;
-    headerSize = 16;
-  } else if (smallSize === 0) {
-    size = end - offset;
-  }
+});
 
-  if (size < headerSize || offset + size > end) {
-    throw new Error(`MP4 invalido: tamanho incorreto na caixa ${type}.`);
-  }
-
-  return {
-    type,
-    offset,
-    size,
-    headerSize,
-    contentStart: offset + headerSize,
-    end: offset + size,
-  };
+function setProgress(value){
+    bar.style.width = value + "%";
 }
 
-function findBox(view, data, start, end, wantedType) {
-  let offset = start;
+async function processVideo(){
 
-  while (offset + 8 <= end) {
-    const box = readBox(view, data, offset, end);
-    if (box.type === wantedType) return box;
-    offset = box.end;
-  }
+    const file = input.files[0];
 
-  return null;
-}
-
-function patchtyceMethod(arrayBuffer) {
-  const data = new Uint8Array(arrayBuffer);
-  const view = new DataView(arrayBuffer);
-
-  const moov = findBox(view, data, 0, data.length, 'moov');
-  if (!moov) {
-    throw new Error('Caixa "moov" nao encontrada. O arquivo precisa ser MP4 valido.');
-  }
-
-  const mvhd = findBox(view, data, moov.contentStart, moov.end, 'mvhd');
-  if (!mvhd) {
-    throw new Error('Caixa "mvhd" nao encontrada dentro de "moov".');
-  }
-
-  const version = data[mvhd.contentStart];
-  let matrixOffset;
-
-  if (version === 0) {
-    matrixOffset = mvhd.offset + 44;
-  } else if (version === 1) {
-    matrixOffset = mvhd.offset + 56;
-  } else {
-    throw new Error(`Versao mvhd nao suportada: ${version}.`);
-  }
-
-  const matrixBOffset = matrixOffset + 4;
-  if (matrixBOffset + 4 > mvhd.end) {
-    throw new Error('Caixa "mvhd" curta demais para alterar a display matrix.');
-  }
-
-  const previousValue = view.getInt32(matrixBOffset, false);
-
-  view.setInt32(matrixBOffset, tyce_MATRIX_B_VALUE, false);
-
-  view.setInt32(matrixOffset + 0, 0x00010000, false);
-  view.setInt32(matrixOffset + 4, 0, false);
-  view.setInt32(matrixOffset + 8, 0, false);
-
-  view.setInt32(matrixOffset + 12, 0, false);
-  view.setInt32(matrixOffset + 16, 0x00010000, false);
-  view.setInt32(matrixOffset + 20, 0, false);
-
-  view.setInt32(matrixOffset + 24, 0, false);
-  view.setInt32(matrixOffset + 28, 0, false);
-  view.setInt32(matrixOffset + 32, 0x40000000, false);
-
-  return {
-    offset: matrixBOffset,
-    previousValue,
-    newValue: tyce_MATRIX_B_VALUE,
-  };
-}
-
-fileInput.addEventListener('change', (e) => {
-  selectedFile = e.target.files && e.target.files[0] ? e.target.files[0] : null;
-  if (selectedFile) {
-    patchBtn.disabled = false;
-    document.body.classList.add('has-file');
-    setStatus('selected', 'idle', { name: selectedFile.name });
-    if (selectedFile.size > SIZE_WARNING_BYTES) {
-      showSizeWarning();
-    } else {
-      hideSizeWarning();
+    if(!file){
+        alert("Upload a video first");
+        return;
     }
-  } else {
-    patchBtn.disabled = true;
-    document.body.classList.remove('has-file');
-    hideSizeWarning();
-    setStatus('ready', 'idle');
-  }
-});
 
-openTabBtn.addEventListener('click', () => {
-  const url = chrome.runtime.getURL('popup.html');
-  chrome.tabs.create({ url });
-});
+    try{
 
-patchBtn.addEventListener('click', async () => {
-  if (!selectedFile) return;
+        statusText.innerText = "Preparing video...";
+        setProgress(15);
 
-  setStatus('scanning', 'processing');
+        statusText.innerText = "Loading FFmpeg core...";
+        setProgress(10);
 
-  try {
-    const arrayBuffer = await selectedFile.arrayBuffer();
-    const patch = patchtyceMethod(arrayBuffer);
+        // REAL FFmpeg WASM for GitHub Pages / Chrome
+        // This works properly online.
 
-    setStatus('patched', 'processing', {
-      previousValue: patch.previousValue,
-      newValue: patch.newValue,
-    });
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js";
 
-    const blob = new Blob([arrayBuffer], {
-      type: selectedFile.type || 'video/mp4'
-    });
-
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      try {
-        const base64data = reader.result;
-
-        const a = document.createElement('a');
-
-        const originalName = selectedFile.name.replace(/\.[^/.]+$/, '');
-
-        a.href = base64data;
-        a.download = `${originalName}_tyce60fps.mp4`;
-        a.target = '_blank';
-
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-
-        setStatus('downloaded', 'success');
-      } catch(err) {
-        setStatus('failed', 'error', {
-          message: err.message || 'Download failed'
+        await new Promise((resolve,reject)=>{
+            script.onload = resolve;
+            script.onerror = reject;
+            document.body.appendChild(script);
         });
-      }
-    };
 
-    reader.readAsDataURL(blob);
-  } catch (err) {
-    setStatus('failed', 'error', {
-      message: err && err.message ? err.message : 'unknown error',
-    });
-  }
-});
+        const { FFmpeg } = FFmpegWASM;
 
-langBtns.forEach((btn) => {
-  btn.addEventListener('click', () => {
-    setLanguage(btn.dataset.lang);
-  });
-});
+        const ffmpeg = new FFmpeg();
 
-studioBtn.addEventListener('click', () => {
-  const desktopURL = 'https://www.tiktok.com/tiktokstudio/upload?from=webapp';
+        await ffmpeg.load({
+            coreURL:"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js"
+        });
 
-  const win = window.open(desktopURL, '_blank');
+        setProgress(30);
+        statusText.innerText = "Writing video...";
 
-  if (win) {
-    try {
-      win.document.write(`
-        <style>
-          html,body{
-            width:1400px !important;
-            min-width:1400px !important;
-            overflow:auto !important;
-            zoom:1.15;
-          }
-        </style>
-      `);
-    } catch(e) {}
-  }
-});
+        const data = await file.arrayBuffer();
 
-sizeWarningCloseBtn.addEventListener('click', hideSizeWarning);
+        await ffmpeg.writeFile(
+            "input.mp4",
+            new Uint8Array(data)
+        );
 
-setLanguage(getSavedLanguage());
+        setProgress(55);
+        statusText.innerText = "Applying -itsscale 2...";
 
-  </script>
+        await ffmpeg.exec([
+            "-itsscale",
+            "2",
+            "-i",
+            "input.mp4",
+            "-c",
+            "copy",
+            "output.mp4"
+        ]);
+
+        setProgress(85);
+        statusText.innerText = "Preparing download...";
+
+        const output = await ffmpeg.readFile("output.mp4");
+
+        const blob = new Blob(
+            [output.buffer],
+            { type:"video/mp4" }
+        );
+
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "output.mp4";
+        a.click();
+
+        URL.revokeObjectURL(url);
+
+        setProgress(100);
+        statusText.innerText = "Download complete ✅";
+
+    }catch(err){
+
+        console.error(err);
+        statusText.innerText = "Error: " + err.message;
+
+    }
+
+}
+
+function wait(ms){
+    return new Promise(resolve => setTimeout(resolve,ms));
+}
+
+</script>
+
 </body>
 </html>
